@@ -1,197 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <style>
-        body, canvas {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-    </style>
+   <title>ClothesWhat</title>
+   <link rel="stylesheet" href="asset.css">
 </head>
-<body onload="init()">
-    <canvas id="canvas"/>
-    <script src="game.js"></script>
+<body>
+
     <script>
-        if(endlessCanvas == undefined){
-            var endlessCanvas = false;
-        }
-        var canvas = document.getElementById("canvas");
-        if(endlessCanvas){
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        var d = new Date();
+        var month = new Array(12);
+        month[0] = "January";
+        month[1] = "February";
+        month[2] = "March";
+        month[3] = "April";
+        month[4] = "May";
+        month[5] = "June";
+        month[6] = "July";
+        month[7] = "August";
+        month[8] = "September";
+        month[9] = "October";
+        month[10] = "November";
+        month[11] = "December";
 
-            window.onresize = function (){
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            };
-        }
-        else
-        {   
-            canvas.width = 1367;
-            canvas.height = 662;
-        }
-        var context = canvas.getContext("2d");  
-        context.fillStyle = "#000000";
-        // global variables with mouse coordinates
-        var mouseX = 0;
-        var mouseY = 0;
-
-        // some keycodes
-        var key_left = 37;
-        var key_up = 38;
-        var key_right = 39;
-        var key_down = 40;
-        var key_a = 65;
-        var key_z = 90;
-
-        var isKeyPressed = [];
-        for (i = 0; i < 256; ++i) {
-            isKeyPressed.push(0);
-        }
-
-        // gridSize = 50; // uncomment or add to game.js if you want a grid
-
-        var reqAnimationFrame =
-            window.requestAnimationFrame ||
-            window.mozRequestAnimationFrame ||
-            window.webkitRequestAnimationFrame ||
-            window.msRequestAnimationFrame ||
-            function (callback) {
-                setTimeout(callback, 1000 / 30);
-            };
-
-        function redraw() {
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            context.globalAlpha = 1;
-
-            // draw grid
-            //context.fillStyle = "#FF0000";
-            context.font = "10px Arial";
-            if (typeof gridSize != "undefined" && gridSize >= 25) {
-                context.fillText(0, 4, 10);
-                context.beginPath();
-                for (i = gridSize; i < canvas.width; i += gridSize) {
-                    context.moveTo(i, 0);
-                    context.lineTo(i, canvas.height);
-                    context.fillText(i, i + 4, 10);
-                }
-                for (i = gridSize; i < canvas.height; i += gridSize) {
-                    context.moveTo(0, i);
-                    context.lineTo(canvas.width, i);
-                    context.fillText(i, 4, i + 10);
-                }
-                context.stroke();
-            }
-
-            draw(); // call progammer's draw() function
-
-            reqAnimationFrame(redraw);
-        };
-
-        function callupdate() {
-            update(); // call programmer's update() function
-            setTimeout(callupdate, 10); // and 10 ms after that ...
-        };
-
-        function areColliding(Ax, Ay, Awidth, Aheight, Bx, By, Bwidth, Bheight) {
-            if (Bx <= Ax + Awidth) {
-                if (Ax <= Bx + Bwidth) {
-                    if (By <= Ay + Aheight) {
-                        if (Ay <= By + Bheight) {
-                            return 1;
-                        }
-                    }
-                }
-            }
-            return 0;
-        };
-
-        function areCirclesColliding(Ax, Ay, Ar, Bx, By,Br){
-        	 if(Ar+Br>=Math.abs(Math.sqrt((Ax-Bx)*(Ax-Bx)+(Ay-By)*(Ay-By)))){
-        	 	return 1;
-        	 }
-        	 return 0;
-        }
-
-        function circleMouseCollision(Cx, Cy, r, pointX, pointY){
-            if(r>=Math.abs(Math.sqrt((pointX-Cx)*(pointX-Cx)+(pointY-Cy)*(pointY-Cy)))){
-                return 1;
-             }
-             return 0;
-        }
-
-        function init() {
-            if ('ontouchstart' in window || navigator.maxTouchPoints) {
-              isMobile = true;
-                window.addEventListener("touchstart", function (e) {
-                    var touchobj = e.changedTouches[0];
-                    mouseX = parseInt(touchobj.pageX - canvas.offsetLeft);
-                    mouseY = parseInt(touchobj.pageY - canvas.offsetTop);
-                    mousedown();
-                });
-
-                window.addEventListener("touchend", function (e) {
-                    var touchobj = e.changedTouches[0];
-                    mouseX = parseInt(touchobj.pageX - canvas.offsetLeft);
-                    mouseY = parseInt(touchobj.pageY - canvas.offsetTop);
-                    mouseup();
-                });
-                window.addEventListener("touchmove", function (e) {
-                    var touchobj = e.changedTouches[0];
-                    mouseX = parseInt(touchobj.pageX - canvas.offsetLeft);
-                    mouseY = parseInt(touchobj.pageY - canvas.offsetTop);
-                });
-            } else {
-                window.addEventListener("mousemove", function (e) {
-                    mouseX = e.pageX - canvas.offsetLeft;
-                    mouseY = e.pageY - canvas.offsetTop;
-                });
-
-                if (typeof mousemove != "undefined") {
-                    window.addEventListener("mousemove", mousemove);
-                }
-                if (typeof mouseup != "undefined") {
-                    window.addEventListener("mouseup", mouseup);
-                }
-                if (typeof mousedown != "undefined") {
-                    window.addEventListener("mousedown", mousedown);
-                }
-
-                if (typeof keydown != "undefined") {
-                    window.addEventListener("keydown", function (e) {
-                        isKeyPressed[e.keyCode] = 1;
-                        keydown(e.keyCode);
-                    });
-                } else {
-                    window.addEventListener("keydown", function (e) {
-                        isKeyPressed[e.keyCode] = 1;
-                    });
-                }
-                if (typeof keyup != "undefined") {
-                    window.addEventListener("keyup", function (e) {
-                        isKeyPressed[e.keyCode] = 0;
-                        keyup(e.keyCode);
-                    });
-                } else {
-                    window.addEventListener("keyup", function (e) {
-                        isKeyPressed[e.keyCode] = 0;
-                    });
-                }
-            }
-            if (typeof draw == "undefined") {
-                redraw = function () {
-                    context.clearRect(0, 0, canvas.width, canvas.height);
-                    context.globalAlpha = 1;
-                    context.fillStyle = "#FF0000";
-                    context.font = "20px Arial";
-                    context.fillText("Press <F12> for error info!", 40, 40);
-                };
-            }
-            redraw();
-            callupdate();
-        };
-
+        var n = month[d.getMonth()];
+        document.getElementById("demo").innerHTML = n;
     </script>
+
+    <div class="month">      
+  <ul>
+    <li class="prev">&#10094;</li>
+    <li class="next">&#10095;</li>
+    <li>
+        <p id="demo"><br>
+            <span style="font-size:18px">2017</span>
+        </p>
+    </li>
+  </ul>
+</div>
+
+<ul class="weekdays">
+  <li>Mo</li>
+  <li>Tu</li>
+  <li>We</li>
+  <li>Th</li>
+  <li>Fr</li>
+  <li>Sa</li>
+  <li>Su</li>
+</ul>
+
+<ul class="days">  
+  <li>1</li>
+  <li>2</li>
+  <li>3</li>
+  <li>4</li>
+  <li>5</li>
+  <li>6</li>
+  <li>7</li>
+  <li>8</li>
+  <li>9</li>
+  <li><span class="active">10</span></li>
+  <li>11</li>
+  <li>12</li>
+  <li>13</li>
+  <li>14</li>
+  <li>15</li>
+  <li>16</li>
+  <li>17</li>
+  <li>18</li>
+  <li>19</li>
+  <li>20</li>
+  <li>21</li>
+  <li>22</li>
+  <li>23</li>
+  <li>24</li>
+  <li>25</li>
+  <li>26</li>
+  <li>27</li>
+  <li>28</li>
+  <li>29</li>
+  <li>30</li>
+  <li>31</li>
+</ul>
+
 </body>
 </html>
